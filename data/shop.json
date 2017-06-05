@@ -1,0 +1,34 @@
+{
+      "info": {
+        "name": "LimeWear Clothing",
+        "address": {
+            "name": "LimeWear Clothing Main Shop",
+            "street": "113 W. Hoover Ave",
+            "suite": "102",
+            "city": "Mesa",
+            "state": "Arizona",
+            "zip": "85210",
+            "country": "United States",
+            "lat": "32.2948",
+            "long": "102.3848",
+            "note": "Located near Golf Land Sun Splash on the 60.",
+            "type": "Business"
+          },
+        "hours": {
+          "sunday": ["Closed"],
+          "monday": ["9:00-17:00"],
+          "tuesday": ["9:00-17:00"],
+          "wednesday": ["9:00-17:00"],
+          "thursday": ["9:00-17:00"],
+          "friday": ["9:00-17:00"],
+          "saturday": ["9:00-11:00", "15:00-18:00"],
+          "lunch": ["12:30-13:00"],
+          "holiday": {
+            "04-07-2017": {
+              "name": "Forth of July",
+              "hours": ["Closed"]
+            }
+          }
+         }
+	}
+}
