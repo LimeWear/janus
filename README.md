@@ -1,2 +1,2 @@
-# janus
-Janus is an all in one place manage a promotional products shop
+# Janus
+Janus is an All-In-One App to manage a promotional products shop
