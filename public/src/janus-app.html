@@ -1,0 +1,313 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/image-mask/image-mask.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-storage-script.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-messaging-script.html">
+
+<link rel="import" href="janus-icons.html">
+<link rel="import" href="janus-auth.html">
+<link rel="lazy-import" href="janus-companies.html">
+<link rel="lazy-import" href="janus-company.html">
+<link rel="lazy-import" href="janus-dashboard.html">
+<link rel="lazy-import" href="janus-opportunity.html">
+<link rel="lazy-import" href="janus-opportunities.html">
+<link rel="lazy-import" href="janus-people.html">
+<link rel="lazy-import" href="janus-person.html">
+<link rel="lazy-import" href="janus-tasks.html">
+<link rel="lazy-import" href="janus-task.html">
+<link rel="lazy-import" href="janus-404.html">
+<dom-module id="janus-app">
+
+  <template>
+    <style>
+      :host {
+        --app-primary-color: #2196f3;
+        --app-secondary-color: black;
+        --app-drawer-background: #2F404C;
+        --app-drawer-width: 280px;
+        --app-drawer-divider: #576a77;
+
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        background-color: var(--app-primary-color);
+        color: #fff;
+          --paper-icon-button-ink-color: #fff;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          color: #fff;
+          background-color: var(--app-drawer-background);
+        }
+      }
+      app-drawer app-toolbar{
+        border-bottom: 1px solid var(--app-drawer-divider);
+        display: block;
+      }
+
+      .drawer-list {
+        margin: 0 20px;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0;
+        text-decoration: none;
+        color: #fff;
+        line-height: 40px;
+      }
+
+      .drawer-list a.iron-selected {
+        color: #fff;
+        font-weight: bold;
+      }
+      .profile-small{
+        font-size: 14px;
+      }
+      .profile-small .profile-img {
+        float: left;
+        width: 50px;
+        padding-top: 10px;
+      }
+      .profile-small .person{
+        padding-top: 10px;
+        font-weight: 400;
+      }
+      .profile-small .company{
+        font-weight: 100;
+        font-size: 12px;
+      }
+      .login,.logout{
+        padding: 0 10px;
+        font-size: 16px;
+        font-weight: 100;
+      }
+      janus-auth{
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #eee;
+        z-index: 10000;
+      }
+
+    </style>
+    <firebase-app
+      auth-domain="limeaid-63730.firebaseapp.com"
+      database-url="https://limeaid-63730.firebaseio.com/"
+      api-key="AIzaSyB4Y06t3G6xPmVInligtb-vQJMkZ-eLa9k"
+      storage-bucket="limeaid-63730.appspot.com">
+    </firebase-app>
+    <firebase-auth id="auth" user="{{user}}" signedIn="{{signedIn}}" provider="google" on-error="handleError">
+    </firebase-auth>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPattern]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+    <template is="dom-if" if="{{!user}}">
+      <janus-auth></janus-auth>
+    </template>
+    <app-drawer-layout fullbleed>
+      <!-- Drawer content -->
+      <app-drawer id="drawer" slot="drawer">
+        <app-toolbar class="profile-small">
+          <div class="profile-img">
+            <image-mask shape="circle" size="40" src="../images/default_profile_image.png" href="#" title="A short description of an image" desc="A long description of an image"></image-mask>
+          </div>
+          <div class="person"><span>Gary Fenn</span></div>
+          <div class="company"><span>Limewear Promotions</span></div>
+        </app-toolbar>
+        <div class="drawer-content">
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+
+            <a name="dashboard" href="dashboard">
+              <paper-icon-item>
+                <iron-icon icon="query-builder" slot="item-icon"></iron-icon> <span>Dashboard</span>
+              </paper-icon-item>
+            </a>
+            <a name="people" href="people">
+              <paper-icon-item>
+                <iron-icon icon="communication:contacts" slot="item-icon"></iron-icon> <span>People</span>
+              </paper-icon-item>
+            </a>
+            <a name="companies" href="companies">
+              <paper-icon-item>
+                <iron-icon icon="communication:business" slot="item-icon"></iron-icon> <span>Companies</span>
+              </paper-icon-item>
+            </a>
+            <a name="opportunities" href="opportunities">
+              <paper-icon-item>
+                <iron-icon icon="editor:attach-money" slot="item-icon"></iron-icon> <span>Opportunities</span>
+              </paper-icon-item>
+            </a>
+            <a name="tasks" href="tasks">
+              <paper-icon-item>
+                <iron-icon icon="icons:check-box" slot="item-icon"></iron-icon> <span>Tasks</span>
+              </paper-icon-item>
+            </a>
+          </iron-selector>
+        </div>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+            <div main-title>Janus</div>
+            <paper-button class="login" raised on-tap="_login" hidden$="[[user]]">Sign in</paper-button>
+            <paper-button class="logout" raised on-tap="_logout" hidden$="[[!user]]">Log out</paper-button>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="404"
+            role="janus-main">
+          <janus-dashboard name="dashboard"></janus-dashboard>
+          <janus-people name="people"></janus-people>
+          <janus-person name="person"></janus-person>
+          <janus-companies name="companies"></janus-companies>
+          <janus-company name="company"></janus-company>
+          <janus-opportunities name="opportunities"></janus-opportunities>
+          <janus-opportunity name="opportunity"></janus-opportunity>
+          <janus-tasks name="tasks"></janus-tasks>
+          <janus-task name="task"></janus-task>
+          <janus-404 name="404"></janus-404>
+          <janus-auth name="auth"></janus-auth>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+  <script>
+    class JanusApp extends Polymer.Element {
+
+      static get is() { return 'janus-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          user: {
+            type: Object
+          },
+          signedIn: {
+            type: Boolean
+          },
+          rootPattern: String,
+          routeData: Object,
+          subroute: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      constructor() {
+        super();
+
+        // Get root pattern for app-route, for more info about `rootPath` see:
+        // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
+        this.rootPattern = (new URL(this.rootPath)).pathname;
+      }
+
+      _routePageChanged(page) {
+        // Polymer 2.0 will call with `undefined` on initialization.
+        // Ignore until we are properly called with a string.
+
+        if (page === undefined) {
+          return;
+        }
+
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'view1' in that case.
+
+
+          this.page = page || 'dashboard';
+
+
+
+        // Close a non-persistent drawer when the page & route are changed.
+        if (!this.$.drawer.persistent) {
+          this.$.drawer.close();
+        }
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('janus-' + page + '.html');
+          Polymer.importHref(
+              resolvedPageUrl,
+              null,
+              this._showPage404.bind(this),
+              true);
+      }
+
+      _showPage404() {
+        this.page = '404';
+      }
+
+      _login() {
+        return this.$.auth.signInWithPopup()
+      }
+      _logout(){
+        return this.$.auth.signOut();
+      }
+    }
+
+    window.customElements.define(JanusApp.is, JanusApp);
+  </script>
+</dom-module>

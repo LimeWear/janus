@@ -3,7 +3,13 @@
     "rules": "database.rules.json"
   },
   "hosting": {
-    "public": "public"
+    "public": "public",
+    "rewrites": [
+      {
+        "source": "!{/bower_components,/src}/**",
+        "destination": "/index.html"
+      }
+    ]
   },
   "functions": {
     "source": "functions"

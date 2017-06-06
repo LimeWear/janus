@@ -1,0 +1,29 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/janus-app.html",
+  "fragments": [
+    "src/janus-companies.html",
+    "src/janus-company.html",
+    "src/janus-dashboard.html",
+    "src/janus-opportunities.html",
+    "src/janus-opportunity.html",
+    "src/janus-people.html",
+    "src/janus-person.html",
+    "src/janus-task.html",
+    "src/janus-tasks.html",
+    "src/janus-auth.html",
+    "src/janus-404.html",
+  ],
+  "sources": [
+    "src/**/*",
+    "images/**/*",
+    "bower.json"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  }
+}

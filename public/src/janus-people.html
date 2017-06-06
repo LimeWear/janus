@@ -1,0 +1,112 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="janus-people">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      paper-card{
+
+      }
+      .person-header { @apply --paper-font-headline; }
+      .cafe-light { color: var(--paper-grey-600); }
+      .person-opportunities {
+        float: right;
+        font-size: 15px;
+        vertical-align: middle;
+      }
+      .add-activity,.add-opportunity { color: var(--google-blue-500); }
+      iron-icon.star {
+        --iron-icon-width: 16px;
+        --iron-icon-height: 16px;
+        color: var(--paper-amber-500);
+      }
+      iron-icon.star:last-of-type { color: var(--paper-grey-500); }
+    </style>
+    <firebase-query
+        id="query"
+        path="/-KlVD-goFLDjxxEM7qEz/Person"
+        data="{{people}}"
+        order-by-child="customer"
+        equal-to=true>
+    </firebase-query>
+    <div>
+    <paper-input id="firstname" label="First Name"></paper-input>
+    <paper-input id="lastname" label="Last Name" on-enter="_addPerson"></paper-input>
+    <paper-button id="add-person" raised on-tap="_addPerson" on-enter="_addPerson">Add Person</paper-button>
+  </div>
+    <template is="dom-repeat" items="{{people}}" as="person">
+      <paper-card>
+        <div class="card-content">
+          <div class="person-header">{{person.info.name.full}}
+            <div class="person-opportunities cafe-light">
+              <iron-icon icon="editor:attach-money"></iron-icon>
+            </div>
+          </div>
+            <div class="person-fullname">Limewear Promotions</div>
+            <div class="person-email">{{person.info.email.address}}</div>
+            <div class="person-phone">480-221-6959</div>
+        </div>
+        <div class="card-actions">
+          <div class="horizontal justified">
+            <paper-button class="add-activity"><iron-icon class="add" icon="add"></iron-icon> Activity</paper-button>
+            <paper-button class="add-opportunity"><iron-icon class="add" icon="add"></iron-icon> Opportunity</paper-button>
+          </div>
+        </div>
+      </paper-card>
+    </template>
+
+
+
+  </template>
+
+  <script>
+
+    class JanusPeople extends Polymer.Element {
+      static get is() { return 'janus-people'; }
+      static get properties() {
+        return {
+          people: {
+            type: Object
+          }
+        };
+      }
+      _addPerson(){
+        this.$.query.ref.push({
+          info:{
+            name:{
+              first: this.$.firstname.value,
+              last: this.$.lastname.value
+            }
+          },
+          customer: true
+        });
+        this.$.firstname.value = null;
+        this.$.lastname.value = null;
+      }
+    }
+
+    window.customElements.define(JanusPeople.is, JanusPeople);
+  </script>
+</dom-module>
