@@ -41,6 +41,16 @@
     "paper-input": "PolymerElements/paper-input#^2.0.0",
     "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^2.0.0",
     "paper-card": "PolymerElements/paper-card#^2.0.0",
-    "login-fire": "convoo/login-fire#^0.1.5"
+    "login-fire": "convoo/login-fire#^0.1.5",
+    "neon-animation": "PolymerElements/neon-animation#^2.0.0",
+    "iron-form": "PolymerElements/iron-form#^1.1.5",
+    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.0",
+    "paper-spinner": "PolymerElements/paper-spinner#^2.0.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
+    "paper-tags-input": "^1.2.6",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0",
+    "iron-dropdown": "PolymerElements/iron-dropdown#^2.0.0",
+    "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0"
   }
 }

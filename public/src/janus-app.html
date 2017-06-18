@@ -22,6 +22,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/communication-icons.html">
@@ -35,28 +39,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-storage-script.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-messaging-script.html">
 
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
 <link rel="import" href="janus-icons.html">
 <link rel="import" href="janus-auth.html">
-<link rel="lazy-import" href="janus-companies.html">
-<link rel="lazy-import" href="janus-company.html">
-<link rel="lazy-import" href="janus-dashboard.html">
-<link rel="lazy-import" href="janus-opportunity.html">
-<link rel="lazy-import" href="janus-opportunities.html">
-<link rel="lazy-import" href="janus-people.html">
-<link rel="lazy-import" href="janus-person.html">
-<link rel="lazy-import" href="janus-tasks.html">
-<link rel="lazy-import" href="janus-task.html">
-<link rel="lazy-import" href="janus-404.html">
+<link rel="import" href="janus-person-add.html">
+<link rel="import" href="person/add-person-form.html">
+<link rel="import" href="organization/add-organization-form.html">
+<link rel="import" href="janus-organizations.html">
+<link rel="import" href="janus-organization.html">
+<link rel="import" href="janus-dashboard.html">
+<link rel="import" href="janus-opportunity.html">
+<link rel="import" href="janus-opportunities.html">
+<link rel="import" href="janus-people.html">
+<link rel="import" href="janus-person.html">
+<link rel="import" href="janus-tasks.html">
+<link rel="import" href="janus-task.html">
+<link rel="import" href="janus-products.html">
+<link rel="import" href="janus-product.html">
+<link rel="import" href="janus-404.html">
 <dom-module id="janus-app">
 
   <template>
-    <style>
+    <style include="paper-dialog-shared-styles">
       :host {
         --app-primary-color: #2196f3;
         --app-secondary-color: black;
         --app-drawer-background: #2F404C;
         --app-drawer-width: 280px;
         --app-drawer-divider: #576a77;
+
 
         display: block;
       }
@@ -69,6 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--app-primary-color);
         color: #fff;
           --paper-icon-button-ink-color: #fff;
+          --paper-item-icon-width: 24px;
       }
 
       app-drawer {
@@ -80,6 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-drawer app-toolbar{
         border-bottom: 1px solid var(--app-drawer-divider);
         display: block;
+
       }
 
       .drawer-list {
@@ -110,7 +126,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding-top: 10px;
         font-weight: 400;
       }
-      .profile-small .company{
+      .profile-small .organization{
         font-weight: 100;
         font-size: 12px;
       }
@@ -132,7 +148,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background: #eee;
         z-index: 10000;
       }
-
+      .modal{
+        top: 20px;
+        max-width: 50%;
+        margin: 0;
+      }
+      #addPerson,
+      #addOrganization{
+        width: 50%;
+        @apply --layout-vertical;
+      }
     </style>
     <firebase-app
       auth-domain="limeaid-63730.firebaseapp.com"
@@ -160,7 +185,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <image-mask shape="circle" size="40" src="../images/default_profile_image.png" href="#" title="A short description of an image" desc="A long description of an image"></image-mask>
           </div>
           <div class="person"><span>Gary Fenn</span></div>
-          <div class="company"><span>Limewear Promotions</span></div>
+          <div class="organization"><span>Limewear Promotions</span></div>
         </app-toolbar>
         <div class="drawer-content">
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -175,9 +200,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="communication:contacts" slot="item-icon"></iron-icon> <span>People</span>
               </paper-icon-item>
             </a>
-            <a name="companies" href="companies">
+            <a name="organizations" href="organizations">
               <paper-icon-item>
-                <iron-icon icon="communication:business" slot="item-icon"></iron-icon> <span>Companies</span>
+                <iron-icon icon="communication:business" slot="item-icon"></iron-icon> <span>Organizations</span>
               </paper-icon-item>
             </a>
             <a name="opportunities" href="opportunities">
@@ -188,6 +213,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a name="tasks" href="tasks">
               <paper-icon-item>
                 <iron-icon icon="icons:check-box" slot="item-icon"></iron-icon> <span>Tasks</span>
+              </paper-icon-item>
+            </a>
+            <a name="products" href="products">
+              <paper-icon-item>
+                <iron-icon icon="icons:check-box" slot="item-icon"></iron-icon> <span>Products</span>
               </paper-icon-item>
             </a>
           </iron-selector>
@@ -202,7 +232,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>Janus</div>
             <paper-button class="login" raised on-tap="_login" hidden$="[[user]]">Sign in</paper-button>
-            <paper-button class="logout" raised on-tap="_logout" hidden$="[[!user]]">Log out</paper-button>
+              <paper-icon-item on-tap="_logout">
+                <iron-icon icon="icons:exit-to-app" slot="item-icon"></iron-icon>
+              </paper-icon-item>
           </app-toolbar>
         </app-header>
 
@@ -213,18 +245,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             role="janus-main">
           <janus-dashboard name="dashboard"></janus-dashboard>
           <janus-people name="people"></janus-people>
-          <janus-person name="person"></janus-person>
-          <janus-companies name="companies"></janus-companies>
-          <janus-company name="company"></janus-company>
+          <janus-person name="person" pid={{pid}}></janus-person>
+          <janus-person-add name="person-add"></janus-person-add>
+          <janus-organizations name="organizations"></janus-organizations>
+          <janus-organization name="organization"></janus-organization>
           <janus-opportunities name="opportunities"></janus-opportunities>
           <janus-opportunity name="opportunity"></janus-opportunity>
           <janus-tasks name="tasks"></janus-tasks>
           <janus-task name="task"></janus-task>
+          <janus-product name="product"></janus-product>
+          <janus-products name="products"></janus-products>
           <janus-404 name="404"></janus-404>
           <janus-auth name="auth"></janus-auth>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
+
+    <paper-dialog id="addPerson" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
+        <add-person-form></add-person-form>
+    </paper-dialog>
+    <paper-dialog id="addOrganization" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
+      <add-organization-form></add-organization-form>
+    </paper-dialog>
+    <paper-dialog id="addOpportunity" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
+      <add-person-form></add-person-form>
+    </paper-dialog>
+    <paper-dialog id="addTask" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
+      <add-person-form></add-person-form>
+    </paper-dialog>
+    <paper-dialog id="addProduct" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
+      <add-person-form></add-person-form>
+    </paper-dialog>
+
   </template>
   <script>
     class JanusApp extends Polymer.Element {
@@ -252,7 +304,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)',
+          '_routePageChanged(routeData.page,subroute)',
         ];
       }
 
@@ -264,21 +316,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.rootPattern = (new URL(this.rootPath)).pathname;
       }
 
-      _routePageChanged(page) {
+      _routePageChanged(page, subroute) {
         // Polymer 2.0 will call with `undefined` on initialization.
         // Ignore until we are properly called with a string.
-
         if (page === undefined) {
           return;
         }
 
-        // If no page was found in the route data, page will be an empty string.
-        // Deault to 'view1' in that case.
-
-
-          this.page = page || 'dashboard';
-
-
+        this.page = page || 'dashboard';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -305,6 +350,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       _logout(){
         return this.$.auth.signOut();
+      }
+      ready(){
+        super.ready();
+        //TODO: Temp fix for dialog showing.
+        this.$.addPerson.style.display = "none";
+        this.$.addOrganization.style.display = "none";
+        this.$.addOpportunity.style.display = "none";
+        this.$.addTask.style.display = "none";
+        this.$.addProduct.style.display = "none";
+
+        const app = document.querySelector('janus-app');
+        app.addEventListener('addnewperson', function (e) {this.$.addPerson.open();})
+        app.addEventListener('addneworganization', function (e) {this.$.addOrganization.open();})
+        app.addEventListener('addnewopportunity', function (e) {this.$.addOpportunity.open();})
+        app.addEventListener('addnewproduct', function (e) {this.$.addProduct.open();})
+        app.addEventListener('addnewtask', function (e) {this.$.addTask.open();})
+
       }
     }
 
