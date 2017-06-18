@@ -1,0 +1,255 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/image-mask/image-mask.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="add-person-form">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        --paper-input-container-input: {
+          font-size: 14px;
+        };
+        --paper-input-container-label: {
+          font-size: 12px;
+        };
+      }
+      h3{
+        padding: 0 10px;
+      }
+      #personNames .name,
+      #personLocations .location,
+      #personReferences{
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+      }
+      #personNames .name paper-input,
+      #personNames .name paper-dropdown-menu,
+      #personLocations .location paper-input,
+      #personLocations .location paper-dropdown-menu,
+      #personReferences paper-input{
+        padding: 0 10px;
+        @apply(--layout-flex-auto);
+
+      }
+      #personReferences{
+        margin-bottom: 20px;
+      }
+      .location{
+        padding-bottom: 10px;
+      }
+      paper-icon-item{
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+        --paper-item-icon-width: 24px;
+        padding: 0 10px;
+      }
+      paper-dialog-scrollable{
+        min-height: 550px;
+      }
+      .buttons{
+        text-align: right;
+      }
+    </style>
+    <firebase-query
+        id="people"
+        path="/-KlVD-goFLDjxxEM7qEz/People"
+        data="{{data}}">
+    </firebase-query>
+
+
+    <form is="iron-form" method="get" action="/" id="newPerson">
+      <paper-dialog-scrollable>
+      <h3>General Information</h3>
+      <div id="personNames">
+        <div id="name" class="name">
+          <paper-dropdown-menu id="salutation" label="Salutation" >
+            <paper-listbox slot="dropdown-content" selected="{{person.salutation}}" attr-for-selected="value">
+              <paper-item value="Mr.">Mr.</paper-item>
+              <paper-item value="Mrs.">Mrs.</paper-item>
+              <paper-item value="Miss">Miss</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-input id="first" value="{{person.first}}" label="First Name" ></paper-input>
+          <paper-input id="middle" value="{{person.middle}}"  label="Middle Name"></paper-input>
+          <paper-input id="last" value="{{person.last}}" label="Last Name"></paper-input>
+          <paper-input id="suffix" value="{{person.suffix}}" label="Suffix"></paper-input>
+          <paper-input id="nickname" value="{{person.nickname}}" label="Nickname"></paper-input>
+        </div>
+      </div>
+      <h3>Address Information</h3>
+      <div class="personLocations">
+        <template is="dom-repeat" items="{{locations}}" as="location" mutableData>
+          <div class="location">
+            <paper-dropdown-menu id="type" label="Type">
+              <paper-listbox slot="dropdown-content" selected="{{location.type}}" attr-for-selected="value">
+                <paper-item value="Shipping">Shipping</paper-item>
+                <paper-item value="Billing">Billing</paper-item>
+                <paper-item value="Other">Other</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input value="{{location.name}}" label="Name"></paper-input>
+            <paper-input value="{{location.street}}" label="Street"></paper-input>
+            <paper-input value="{{location.street2}}" label="Street 2"></paper-input>
+            <paper-input value="{{location.city}}" label="City"></paper-input>
+            <paper-input value="{{location.state}}" label="State"></paper-input>
+            <paper-input value="{{location.zip}}" label="Zip"></paper-input>
+          </div>
+        </template>
+      </div>
+      <array-selector id="selector" items="{{locations}}" selected="{{selected}}" multi toggle></array-selector>
+      <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon> Add Location</paper-icon-item>
+      <h3>Linked to:</h3>
+      <div id="personReferences">
+        <paper-input id="personOrganization" name="organization" label="Organization"></paper-input>
+        <paper-input id="personOwner" name="owner" label="Owner"></paper-input>
+      </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss raised class="green" on-tap="_resetPerson">Submit</paper-button>
+        <paper-button dialog-dismiss on-tap="_resetPerson">Cancel</paper-button>
+      </div>
+    </form>
+  </template>
+
+  <script>
+    class AddPersonForm extends Polymer.MutableData(Polymer.Element)  {
+      static get is() { return 'add-person-form'; }
+      static get properties() {
+        return {
+          personPushId: {
+            type: String,
+            value: null
+          },
+          person: {
+            type: Object,
+            value: function() {
+              return {};
+            },
+          },
+          locations: {
+            type: Array,
+            value: function() {
+              return [{}];
+            },
+          },
+          locationKeys: {
+            type: Object,
+            value: function() {
+              return {};
+            },
+          },
+          contacts: {
+            type: Array,
+
+          },
+          organization: {
+            type: Array,
+
+          }
+        };
+      }
+      static get observers() {
+        return [
+          '_personUpdated(person.*)',
+          '_locationUpdated(locations.*)'
+        ]
+      }
+      ready(){
+        super.ready();
+        var scrollable = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
+        scrollable.dialogElement = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
+      }
+      _personUpdated(changeRecord){
+      //  console.log(changeRecord);
+        var key = this.personPushId;
+        var recordPath = changeRecord.path;
+        var value = changeRecord.value;
+        var base = changeRecord.base;
+
+        if(!key && recordPath != 'person'){
+          var newPersonRef = this.$.people.ref.push().key;
+          this.set('personPushId', newPersonRef);
+        }else{
+          var dataKey = changeRecord.path.split('.')[1];
+          var updatedData = {};
+          updatedData['/'+ key +'/info/name/' + dataKey] = value;
+          this.$.people.ref.update(updatedData);
+        }
+      }
+      _locationUpdated(changeRecord){
+        var key = this.personPushId;
+        var recordPath = changeRecord.path;
+        var value = changeRecord.value;
+        var base = changeRecord.base;
+        if(!key){
+          var pushId = this.$.people.ref.push().key;
+          this.set('personPushId', pushId);
+        }
+        var index = changeRecord.path.split('.')[1];
+        var userRecordPath = changeRecord.path.split('.');
+
+        if(userRecordPath.length > 2){
+          if(typeof value != "object"){
+            if(!('key' in base[index])){
+              base[index]['key'] = this.$.people.ref.push().key;
+            }
+            var dataKey = changeRecord.path.split('.')[2];
+            if(dataKey){
+              var updatedData = {};
+              updatedData['/'+ key +'/locations/'+ base[index]['key'] +'/'+ dataKey] = value;
+              this.$.people.ref.update(updatedData);
+            }
+          }
+        }
+      }
+      _addLocation(){
+        this.push('locations', {});
+      }
+      _resetPerson(){
+        this.set('personPushId', '');
+        this.set('person', {});
+        this.set('locations', [{}]);
+      }
+      _contactChanged(person, contact){
+        console.log(person);
+        console.log(contact);
+      }
+      _organizationChanged(person, organization){
+        console.log(person);
+        console.log(organization);
+      }
+    }
+
+    window.customElements.define(AddPersonForm.is, AddPersonForm);
+  </script>
+</dom-module>

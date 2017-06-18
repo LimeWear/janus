@@ -1,0 +1,93 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel="import" href="organization/organization-icard.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="janus-organizations">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .container {
+        @apply --layout-horizontal;
+        @apply --layout-justified;
+      }
+      .icard {
+        padding: 10px;
+      }
+      .person-header { @apply --paper-font-headline; }
+      .cafe-light { color: var(--paper-grey-600); }
+      .person-opportunities {
+        float: right;
+        font-size: 15px;
+        vertical-align: middle;
+      }
+      .add-activity,.add-opportunity { color: var(--google-blue-500); }
+      iron-icon.star {
+        --iron-icon-width: 16px;
+        --iron-icon-height: 16px;
+        color: var(--paper-amber-500);
+      }
+      iron-icon.star:last-of-type { color: var(--paper-grey-500); }
+      .add-actions{
+        padding: 10px;
+        text-align: right;
+      }      
+    </style>
+    <firebase-query
+        id="query"
+        path="/-KlVD-goFLDjxxEM7qEz/Organizations"
+        data="{{organizations}}">
+    </firebase-query>
+    <div class="add-actions">
+      <paper-button id="addPerson" class="green" raised on-tap="_addOrganizationForm">Add Organization</paper-button>
+    </div>
+    <div class="container layout horizontal wrap">
+      <template is="dom-repeat" items="{{organizations}}" as="organization">
+        <organization-icard organization="{{organization}}" class="icard flex-auto"></organization-icard>
+      </template>
+    </div>
+
+
+  </template>
+
+  <script>
+    class JanusOrganizations extends Polymer.Element {
+      static get is() { return 'janus-organizations'; }
+      static get properties() {
+        return {
+          modalOpened: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+      _addOrganizationForm(e) {
+        this.dispatchEvent(new CustomEvent('addNewOrganization', {bubbles: true, composed: true}));
+      }
+    }
+
+    window.customElements.define(JanusOrganizations.is, JanusOrganizations);
+  </script>
+</dom-module>

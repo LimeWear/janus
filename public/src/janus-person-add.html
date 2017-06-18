@@ -1,0 +1,220 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/image-mask/image-mask.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="janus-person-add">
+  <template>
+    <style include="shared-styles iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        --paper-input-container-input: {
+          font-size: 14px;
+        };
+      }
+      .add-person-container{
+        display: flex;
+      }
+      .form{
+        flex: 4 0 0;
+      }
+      .display{
+        flex: 5 0 0;
+      }
+    </style>
+    <firebase-query
+        id="addPerson"
+        path="/-KlVD-goFLDjxxEM7qEz/People"
+        data="{{people}}">
+    </firebase-query>
+    <firebase-query
+        id="updatePerson"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{personKey}}"
+        data="{{person}}">
+    </firebase-query>
+    <firebase-query
+        id="addLocation"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{personKey}}/locations"
+        data="{{locations}}">
+    </firebase-query>
+    <firebase-query
+        id="updateLocation"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{personKey}}/locations/{{locationKey}}"
+        data="{{location}}">
+    </firebase-query>
+    <firebase-query
+        id="addContacts"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{personKey}}/contacts"
+        data="{{contacts}}">
+    </firebase-query>
+    <firebase-query
+        id="editContact"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{personKey}}/contacts/{{contactKey}}"
+        data="{{contact}}">
+    </firebase-query>
+    <div class="add-person-container">
+      <div class="form card">
+        <h3>General Information</h3>
+        <div id="personNames">
+          <div id="name" class="name">
+            <paper-dropdown-menu id="salutation" label="Salutation">
+              <paper-listbox slot="dropdown-content" selected="{{salutation}}" attr-for-selected="value">
+                <paper-item value="Mr.">Mr.</paper-item>
+                <paper-item value="Mrs.">Mrs.</paper-item>
+                <paper-item value="Miss">Miss</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input id="first" value="{{first}}" label="First Name" required auto-validate autoFocus></paper-input>
+            <paper-input id="middle" value="{{middle}}"  label="Middle Name"></paper-input>
+            <paper-input id="last" value="{{last}}" label="Last Name" required auto-validate></paper-input>
+            <paper-input id="suffix" value="{{suffix}}" label="Suffix"></paper-input>
+            <paper-input id="nickname" value="{{nickname}}" label="Nickname"></paper-input>
+          </div>
+        </div>
+        <h3>Address Information</h3>
+        <template is="dom-repeat" items="{{locations}}" as="location">
+          <template is="dom-if" if="{{location.created}}">
+            <div class="locationAdded">{{location.type}}:{{location.street}} {{location.streetTwo}} {{location.city}} {{location.state}}, {{location.zip}} <iron-icon icon="editor:mode-edit" slot="item-icon" on-tap="_editLocation" data-arg="location.$key"></iron-icon></div>
+          </template>
+        </template>
+        <div id="personLocations">
+          <div id="location" class="location">
+            <paper-dropdown-menu id="type" label="Type">
+              <paper-listbox slot="dropdown-content" selected="{{type}}" attr-for-selected="value">
+                <paper-item value="Shipping">Shipping</paper-item>
+                <paper-item value="Billing">Billing</paper-item>
+                <paper-item value="Other">Other</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input value="{{name}}" label="Name"></paper-input>
+            <paper-input value="{{street}}" label="Street"></paper-input>
+            <paper-input value="{{streetTwo}}" label="Street 2"></paper-input>
+            <paper-input value="{{city}}" label="City"></paper-input>
+            <paper-input value="{{state}}" label="State"></paper-input>
+            <paper-input value="{{zip}}" label="Zip"></paper-input>
+          </div>
+        </div>
+        <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon> Add Location</paper-icon-item>
+        <h3>Linked to:</h3>
+        <div id="personReferences">
+          <paper-input id="personOrganization" name="organization" label="Organization"></paper-input>
+          <paper-input id="personOwner" name="owner" label="Owner"></paper-input>
+        </div>
+        <div class="buttons">
+          <paper-button raised class="green" on-tap="_addPerson">Submit</paper-button>
+          <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+      </div>
+      <div class="display card">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>
+    </div>
+  </template>
+
+  <script>
+    class JanusPersonAdd extends Polymer.Element {
+      static get is() { return 'janus-person-add'; }
+      static get properties() {
+        return {
+          location: {
+            type: Object
+          },
+          personKey: {
+            type: String
+          },
+          locationKey: {
+            type: String
+          },
+          salutation:{
+            type: String,
+            notify: true
+          },
+          first:{
+            type: String,
+            notify: true,
+          },
+          middle:{
+            type: String,
+            notify: true
+          },
+          last:{
+            type: String,
+            notify: true
+          },
+          suffix:{
+            type: String,
+            notify: true
+          },
+          nickname:{
+            type: String,
+            notify: true
+          },
+          type:{
+            type: String,
+            notify: true
+          },
+          name:{
+            type: String,
+            notify: true
+          },
+          street:{
+            type: String,
+            notify: true
+          },
+          streetTwo:{
+            type: String,
+            notify: true
+          },
+          city:{
+            type: String,
+            notify: true
+          },
+          state:{
+            type: String,
+            notify: true
+          },
+          zip:{
+            type: String,
+            notify: true
+          },
+          organization: {
+            type: Object,
+          }
+        };
+      }
+      static get observers() {
+        return [
+            '_personChanged(salutation,first,middle,last,suffix,nickname)',
+            '_locationChanged(type,name,street,streetTwo,city,state,zip)',
+        ]
+      }
+
+    }
+
+    window.customElements.define(JanusPersonAdd.is, JanusPersonAdd);
+  </script>
+</dom-module>

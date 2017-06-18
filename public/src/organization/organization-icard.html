@@ -1,0 +1,69 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="organization-icard">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: flex;
+        color: #333;
+      }
+      paper-card, a {
+        width: 100%;
+      }
+      .fullname{
+        font-size: 16px;
+      }
+      .organization,.email,.phone{
+        font-size: 12px;
+      }
+      .card-content{
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+    <a name="organization" href="/organization/[[organization.$key]]">
+    <paper-card>
+      <div class="card-content">
+        <div class="organization-info">
+          <div class="name">{{organization.info.name}}</div>
+          <div class="email">{{person.info.email.address}}</div>
+          <div class="phone">480-221-6959</div>
+        </div>
+      </div>
+    </paper-card>
+    </a>
+  </template>
+
+  <script>
+    class OrganizationIcard extends Polymer.Element {
+      static get is() { return 'organization-icard'; }
+      static get properties() {
+        return {
+          organization: {
+            type: Object,
+          }
+
+        };
+      }
+
+    }
+
+    window.customElements.define(OrganizationIcard.is, OrganizationIcard);
+  </script>
+</dom-module>
