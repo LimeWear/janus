@@ -51,6 +51,8 @@
     "paper-tags-input": "^1.2.6",
     "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0",
     "iron-dropdown": "PolymerElements/iron-dropdown#^2.0.0",
-    "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0"
+    "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0",
+    "paper-fab": "PolymerElements/paper-fab#^2.0.0",
+    "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^2.0.0"
   }
 }

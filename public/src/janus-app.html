@@ -23,6 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
@@ -45,9 +46,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="janus-icons.html">
 <link rel="import" href="janus-auth.html">
-<link rel="import" href="janus-person-add.html">
-<link rel="import" href="person/add-person-form.html">
-<link rel="import" href="organization/add-organization-form.html">
 <link rel="import" href="janus-organizations.html">
 <link rel="import" href="janus-organization.html">
 <link rel="import" href="janus-dashboard.html">
@@ -70,11 +68,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --app-drawer-background: #2F404C;
         --app-drawer-width: 280px;
         --app-drawer-divider: #576a77;
-
-
         display: block;
+        margin: 0;
+        padding: 0;
       }
-
+      iron-pages{
+        height: 100%;
+      }
       app-drawer-layout:not([narrow]) [drawer-toggle] {
         display: none;
       }
@@ -167,7 +167,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-app>
     <firebase-auth id="auth" user="{{user}}" signedIn="{{signedIn}}" provider="google" on-error="handleError">
     </firebase-auth>
-
+    <firebase-query
+        id="query"
+        path="/-KlVD-goFLDjxxEM7qEz"
+        data="{{data}}">
+    </firebase-query>
     <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
@@ -231,6 +235,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>Janus</div>
+            <paper-menu-button>
+              <paper-icon-button icon="add" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-item on-tap="_janusAdd" data-item="person">Person</paper-item>
+                <paper-item on-tap="_janusAdd" data-item="organization">Organization</paper-item>
+                <paper-item on-tap="_janusAdd" data-item="opportunity">Opportunity</paper-item>
+                <paper-item on-tap="_janusAdd" data-item="type">Task</paper-item>
+                <paper-item on-tap="_janusAdd" data-item="product">Product</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
             <paper-button class="login" raised on-tap="_login" hidden$="[[user]]">Sign in</paper-button>
               <paper-icon-item on-tap="_logout">
                 <iron-icon icon="icons:exit-to-app" slot="item-icon"></iron-icon>
@@ -243,40 +257,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             attr-for-selected="name"
             fallback-selection="404"
             role="janus-main">
-          <janus-dashboard name="dashboard"></janus-dashboard>
-          <janus-people name="people"></janus-people>
-          <janus-person name="person" pid={{pid}}></janus-person>
-          <janus-person-add name="person-add"></janus-person-add>
-          <janus-organizations name="organizations"></janus-organizations>
-          <janus-organization name="organization"></janus-organization>
-          <janus-opportunities name="opportunities"></janus-opportunities>
-          <janus-opportunity name="opportunity"></janus-opportunity>
-          <janus-tasks name="tasks"></janus-tasks>
-          <janus-task name="task"></janus-task>
-          <janus-product name="product"></janus-product>
-          <janus-products name="products"></janus-products>
+          <janus-dashboard name="dashboard" route="{{subroute}}"></janus-dashboard>
+          <janus-people name="people" route="{{subroute}}"></janus-people>
+          <janus-person name="person" route="{{subroute}}"></janus-person>
+          <janus-organizations name="organizations" route="{{subroute}}"></janus-organizations>
+          <janus-organization name="organization" route="{{subroute}}"></janus-organization>
+          <janus-opportunities name="opportunities" route="{{subroute}}"></janus-opportunities>
+          <janus-opportunity name="opportunity" route="{{subroute}}"></janus-opportunity>
+          <janus-tasks name="tasks" route="{{subroute}}"></janus-tasks>
+          <janus-task name="task" route="{{subroute}}"></janus-task>
+          <janus-product name="product" route="{{subroute}}"></janus-product>
+          <janus-products name="products" route="{{subroute}}"></janus-products>
           <janus-404 name="404"></janus-404>
           <janus-auth name="auth"></janus-auth>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
-
-    <paper-dialog id="addPerson" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
-        <add-person-form></add-person-form>
-    </paper-dialog>
-    <paper-dialog id="addOrganization" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
-      <add-organization-form></add-organization-form>
-    </paper-dialog>
-    <paper-dialog id="addOpportunity" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
-      <add-person-form></add-person-form>
-    </paper-dialog>
-    <paper-dialog id="addTask" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
-      <add-person-form></add-person-form>
-    </paper-dialog>
-    <paper-dialog id="addProduct" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal with-backdrop>
-      <add-person-form></add-person-form>
-    </paper-dialog>
-
   </template>
   <script>
     class JanusApp extends Polymer.Element {
@@ -351,22 +347,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _logout(){
         return this.$.auth.signOut();
       }
-      ready(){
-        super.ready();
-        //TODO: Temp fix for dialog showing.
-        this.$.addPerson.style.display = "none";
-        this.$.addOrganization.style.display = "none";
-        this.$.addOpportunity.style.display = "none";
-        this.$.addTask.style.display = "none";
-        this.$.addProduct.style.display = "none";
+      _janusAdd(e){
+        var type = e.target.dataset.item;
+      //  console.log(this.routeData, this.subroute );
+        if(type == 'person'){
+          var locationPushId = this._newPushID();
+          var contactPushId = this._newPushID();
+          var newPerson = {
+            'info':{
+              'name':{
+                'first': "Person (New)",
+              }
+            },
+            'locations':{
+              [locationPushId]: {
+                'type': 'Billing',
+              }
+            },
+            'contacts':{
+              [contactPushId]: {
+                'type': 'Phone',
+              }
+            }
+          };
+          this.$.query.path = '/-KlVD-goFLDjxxEM7qEz/People';
+          var personPushId = this.$.query.ref.push(newPerson).key;
+          this.set('route.path', '/person/'+personPushId+'/new');
 
-        const app = document.querySelector('janus-app');
-        app.addEventListener('addnewperson', function (e) {this.$.addPerson.open();})
-        app.addEventListener('addneworganization', function (e) {this.$.addOrganization.open();})
-        app.addEventListener('addnewopportunity', function (e) {this.$.addOpportunity.open();})
-        app.addEventListener('addnewproduct', function (e) {this.$.addProduct.open();})
-        app.addEventListener('addnewtask', function (e) {this.$.addTask.open();})
-
+        }
+        if(type == 'organization'){
+          var locationPushId = this._newPushID();
+          var contactPushId = this._newPushID();
+          var newOrganization = {
+            'info':{
+              'name':"Organization (NEW)"
+            },
+            'locations':{
+              [locationPushId]: {
+                'type': 'Billing',
+              }
+            },
+            'contacts':{
+              [contactPushId]: {
+                'type': 'Phone',
+              }
+            }
+          };
+          this.$.query.path = '/-KlVD-goFLDjxxEM7qEz/Organizations';
+          var organizationPushId = this.$.query.ref.push(newOrganization).key;
+          this.set('route.path', '/organization/'+organizationPushId+'/new');
+        }
+      }
+      _newPushID(){
+        return this.$.query.ref.push().key;
       }
     }
 

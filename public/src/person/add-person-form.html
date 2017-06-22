@@ -25,17 +25,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="add-person-form">
   <template>
     <style include="shared-styles">
       :host {
+        padding: 20px;
         display: block;
+        overflow: auto;
+        position: absolute;
+        top: 0;
+        bottom: 0;
         --paper-input-container-input: {
           font-size: 14px;
         };
@@ -47,15 +48,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 0 10px;
       }
       #personNames .name,
-      #personLocations .location,
+      .location,
+      .contacts,
       #personReferences{
         @apply(--layout-horizontal);
         @apply(--layout-wrap);
       }
       #personNames .name paper-input,
       #personNames .name paper-dropdown-menu,
-      #personLocations .location paper-input,
-      #personLocations .location paper-dropdown-menu,
+      .location paper-input,
+      .location paper-dropdown-menu,
+      .contacts paper-input,
+      .contacts paper-dropdown-menu,
       #personReferences paper-input{
         padding: 0 10px;
         @apply(--layout-flex-auto);
@@ -73,37 +77,69 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-item-icon-width: 24px;
         padding: 0 10px;
       }
-      paper-dialog-scrollable{
-        min-height: 550px;
-      }
       .buttons{
         text-align: right;
       }
+      .action-buttons{
+        height: 65px;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        background: #fff;
+        border-top: 1px solid #ccc;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: row /* works with row or column */
+        flex-direction: row;
+        -webkit-align-items: center;
+        align-items: center;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
+      .green{
+        margin-right: 20px;
+      }
+      #close{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      paper-fab.green{
+        --paper-fab-background: var(--paper-green-500);
+        --paper-fab-keyboard-focus-background: var(--paper-green-700);
+        position: fixed;
+        top: 10px;
+        right: 10px;
+      }
     </style>
     <firebase-query
-        id="people"
-        path="/-KlVD-goFLDjxxEM7qEz/People"
-        data="{{data}}">
+        id="personLocations"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{pid}}/locations"
+        data="{{locations}}">
     </firebase-query>
-
-
-    <form is="iron-form" method="get" action="/" id="newPerson">
-      <paper-dialog-scrollable>
+    <firebase-query
+        id="personContacts"
+        path="/-KlVD-goFLDjxxEM7qEz/People/{{pid}}/contacts"
+        data="{{contacts}}">
+    </firebase-query>
+      <paper-fab mini icon="done" class="green" on-tap="_save"></paper-fab>
+      <!-- <paper-icon-item id="close" on-tap="_closeDrawer"><iron-icon icon="icons:close" slot="item-icon" ></iron-icon></paper-icon-item> -->
       <h3>General Information</h3>
       <div id="personNames">
         <div id="name" class="name">
-          <paper-dropdown-menu id="salutation" label="Salutation" >
-            <paper-listbox slot="dropdown-content" selected="{{person.salutation}}" attr-for-selected="value">
+          <paper-dropdown-menu id="salutation" label="Salutation">
+            <paper-listbox slot="dropdown-content" selected="{{person.info.name.salutation}}" attr-for-selected="value">
               <paper-item value="Mr.">Mr.</paper-item>
               <paper-item value="Mrs.">Mrs.</paper-item>
               <paper-item value="Miss">Miss</paper-item>
             </paper-listbox>
           </paper-dropdown-menu>
-          <paper-input id="first" value="{{person.first}}" label="First Name" ></paper-input>
-          <paper-input id="middle" value="{{person.middle}}"  label="Middle Name"></paper-input>
-          <paper-input id="last" value="{{person.last}}" label="Last Name"></paper-input>
-          <paper-input id="suffix" value="{{person.suffix}}" label="Suffix"></paper-input>
-          <paper-input id="nickname" value="{{person.nickname}}" label="Nickname"></paper-input>
+          <paper-input id="first" value="{{person.info.name.first}}" label="First Name" autofocus></paper-input>
+          <paper-input id="middle" value="{{person.info.name.middle}}"  label="Middle Name"></paper-input>
+          <paper-input id="last" value="{{person.info.name.last}}" label="Last Name"></paper-input>
+          <paper-input id="suffix" value="{{person.info.name.suffix}}" label="Suffix"></paper-input>
+          <paper-input id="nickname" value="{{person.info.name.nickname}}" label="Nickname"></paper-input>
         </div>
       </div>
       <h3>Address Information</h3>
@@ -125,128 +161,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-input value="{{location.zip}}" label="Zip"></paper-input>
           </div>
         </template>
+        <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon>Add Location</paper-icon-item>
+        <h3>Contact Information</h3>
+        <div class="personLocations">
+          <template is="dom-repeat" items="{{contacts}}" as="contact" mutableData>
+            <div class="contacts">
+              <paper-dropdown-menu id="type" label="Type">
+                <paper-listbox slot="dropdown-content" selected="{{contact.type}}" attr-for-selected="value">
+                  <paper-item value="Phone">Phone</paper-item>
+                  <paper-item value="Email">Email</paper-item>
+                  <paper-item value="Other">Other</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <paper-input value="{{contact.name}}" label="Name"></paper-input>
+              <paper-input value="{{contact.value}}" label="Value"></paper-input>
+              <paper-input value="{{contact.note}}" label="Note"></paper-input>
+            </div>
+          </template>
       </div>
-      <array-selector id="selector" items="{{locations}}" selected="{{selected}}" multi toggle></array-selector>
-      <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon> Add Location</paper-icon-item>
+      <paper-icon-item on-tap="_addContact"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon>Add Contact</paper-icon-item>
       <h3>Linked to:</h3>
       <div id="personReferences">
         <paper-input id="personOrganization" name="organization" label="Organization"></paper-input>
         <paper-input id="personOwner" name="owner" label="Owner"></paper-input>
       </div>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss raised class="green" on-tap="_resetPerson">Submit</paper-button>
-        <paper-button dialog-dismiss on-tap="_resetPerson">Cancel</paper-button>
-      </div>
-    </form>
   </template>
 
   <script>
     class AddPersonForm extends Polymer.MutableData(Polymer.Element)  {
+      constructor() {
+        super();
+
+      }
       static get is() { return 'add-person-form'; }
       static get properties() {
         return {
-          personPushId: {
+          pid: {
             type: String,
-            value: null
           },
           person: {
             type: Object,
-            value: function() {
-              return {};
-            },
           },
           locations: {
             type: Array,
-            value: function() {
-              return [{}];
-            },
-          },
-          locationKeys: {
-            type: Object,
-            value: function() {
-              return {};
-            },
           },
           contacts: {
             type: Array,
-
           },
           organization: {
             type: Array,
-
-          }
+          },
+          opened: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true
+          },
         };
       }
-      static get observers() {
-        return [
-          '_personUpdated(person.*)',
-          '_locationUpdated(locations.*)'
-        ]
-      }
-      ready(){
-        super.ready();
-        var scrollable = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
-        scrollable.dialogElement = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
-      }
-      _personUpdated(changeRecord){
-      //  console.log(changeRecord);
-        var key = this.personPushId;
-        var recordPath = changeRecord.path;
-        var value = changeRecord.value;
-        var base = changeRecord.base;
-
-        if(!key && recordPath != 'person'){
-          var newPersonRef = this.$.people.ref.push().key;
-          this.set('personPushId', newPersonRef);
-        }else{
-          var dataKey = changeRecord.path.split('.')[1];
-          var updatedData = {};
-          updatedData['/'+ key +'/info/name/' + dataKey] = value;
-          this.$.people.ref.update(updatedData);
-        }
-      }
-      _locationUpdated(changeRecord){
-        var key = this.personPushId;
-        var recordPath = changeRecord.path;
-        var value = changeRecord.value;
-        var base = changeRecord.base;
-        if(!key){
-          var pushId = this.$.people.ref.push().key;
-          this.set('personPushId', pushId);
-        }
-        var index = changeRecord.path.split('.')[1];
-        var userRecordPath = changeRecord.path.split('.');
-
-        if(userRecordPath.length > 2){
-          if(typeof value != "object"){
-            if(!('key' in base[index])){
-              base[index]['key'] = this.$.people.ref.push().key;
-            }
-            var dataKey = changeRecord.path.split('.')[2];
-            if(dataKey){
-              var updatedData = {};
-              updatedData['/'+ key +'/locations/'+ base[index]['key'] +'/'+ dataKey] = value;
-              this.$.people.ref.update(updatedData);
-            }
-          }
-        }
-      }
       _addLocation(){
-        this.push('locations', {});
+        var pushId = this.$.personLocations.ref.push().key;
+        this.push('locations', {
+          '$key': pushId,
+          'type': "Billing"
+        });
       }
-      _resetPerson(){
-        this.set('personPushId', '');
-        this.set('person', {});
-        this.set('locations', [{}]);
+      _addContact(){
+        var pushId = this.$.personLocations.ref.push().key;
+        this.push('contacts', {
+          '$key': pushId,
+          'type': "Billing"
+        });
       }
-      _contactChanged(person, contact){
-        console.log(person);
-        console.log(contact);
-      }
-      _organizationChanged(person, organization){
-        console.log(person);
-        console.log(organization);
+      _save(){
+        this.set('opened', false);
+        var timestamp = Date.now();
+        this.$.personLocations.path = "/-KlVD-goFLDjxxEM7qEz/People/"+this.pid+"/info/timestamp/updated";
+        this.$.personLocations.ref.set(timestamp);
       }
     }
 

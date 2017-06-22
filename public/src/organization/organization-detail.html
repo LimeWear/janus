@@ -18,18 +18,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
-<link rel="import" href="add-person-form.html">
+<link rel="import" href="add-organization-form.html">
 <link rel="import" href="../utils/janus-drawer.html">
 <link rel="import" href="../shared-styles.html">
 
-<dom-module id="person-detail">
+<dom-module id="organization-detail">
   <template>
     <style include="shared-styles iron-flex iron-flex-alignment">
       :host {
         display: block;
         height: 100%;
       }
-      .personHeader{
+      .organizationHeader{
         @apply(--layout-horizontal);
         @apply(--layout-wrap);
       }
@@ -47,10 +47,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .name{
         font-weight: bold;
       }
-      #personContent{
+      #organizationContent{
         @apply(--layout-horizontal);
       }
-      person-details{
+      organization-details{
         @apply(--layout-flex-2);
       }
       #timeline{
@@ -60,42 +60,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 100%;
       }
     </style>
-    <app-route route="{{route}}" pattern="/:pid" data="{{routeData}}" tail="{{ops}}"></app-route>
+    <app-route route="{{route}}" pattern="/:oid" data="{{routeData}}" tail="{{ops}}"></app-route>
 
     <firebase-document
-      id="personDetails"
-      path="/-KlVD-goFLDjxxEM7qEz/People/{{routeData.pid}}"
-      data="{{person}}">
+      id="organizationDetails"
+      path="/-KlVD-goFLDjxxEM7qEz/Organizations/{{routeData.oid}}"
+      data="{{organization}}">
     </firebase-document>
     <paper-dialog id="confirmDelete" class="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
       <div class="buttons">
         <paper-button dialog-dismiss>Just kidding</paper-button>
-        <paper-button on-tap="_deletePerson" dialog-confirm autofocus>DELETE</paper-button>
+        <paper-button on-tap="_deleteOrganization" dialog-confirm autofocus>DELETE</paper-button>
       </div>
      </paper-dialog>
-    <janus-drawer id="changePerson" opened={{opened}}>
+    <janus-drawer id="changeOrganization" opened={{opened}}>
       <div id="drawer" slot="janus-drawer">
-        <add-person-form person="{{person}}" pid="[[routeData.pid]]" opened="{{opened}}" ></add-person-form>
+        <add-organization-form organization="{{organization}}" oid="[[routeData.oid]]" opened="{{opened}}"></add-organization-form>
       </div>
-      <div class="card personHeader">
+      <div class="card organizationHeader">
         <div class="profile-img">
           <image-mask shape="circle" size="50" src="../images/default_profile_image.png" href="#" title="A short description of an image" desc="A long description of an image"></image-mask>
         </div>
-        <h1>{{person.info.name.first}} {{person.info.name.last}} {{querydisabled}}</h1>
+        <h1>{{organization.info.name}}</h1>
         <div class="contactOwner container flex-end-justified flex">
           <image-mask shape="circle" size="30" src="../images/default_profile_image.png" href="#" title="A short description of an image" desc="A long description of an image"></image-mask>
           <div class="ownerName"><div class="name">Alex Dora</div><label>Owner</label></div>
           <paper-menu-button vertical-align="top" horizontal-align="right">
             <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content" >
-              <paper-item on-tap="_editPerson">Edit</paper-item>
+              <paper-item on-tap="_editOrganization">Edit</paper-item>
               <paper-item>Merge</paper-item>
               <paper-item on-tap="_confirmDelete">Delete</paper-item>
             </paper-listbox>
           </paper-menu-button>
         </div>
       </div>
-      <div id="personContent" class="container flex-horizontal-with-ratios">
+      <div id="organizationContent" class="container flex-horizontal-with-ratios">
         <div id="timeline" class="card">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>
       </div>
     </janus-drawer>
@@ -103,11 +103,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class PersonDetail extends Polymer.Element {
-      static get is() { return 'person-detail'; }
+    class OrganizationDetail extends Polymer.Element {
+      static get is() { return 'organization-detail'; }
       static get properties() {
         return {
-          person: {
+          organization: {
             type: Object
           },
           route: String,
@@ -119,7 +119,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false,
             notify: true,
             reflectToAttribute: true
-          },
+          }
         };
       }
       static get observers() {
@@ -132,18 +132,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.set('opened', true);
         }
       }
-      _editPerson(){
+      _editOrganization(){
         this.set('opened', true);
       }
       _confirmDelete(){
         this.$.confirmDelete.open();
       }
-      _deletePerson(){
-        this.$.personDetails.destroy();
-        window.history.pushState({}, null, '/people');
+      _deleteOrganization(){
+        this.$.organizationDetails.destroy();
+        window.history.pushState({}, null, '/organizations');
         window.dispatchEvent(new CustomEvent('location-changed'));
       }
     }
-    window.customElements.define(PersonDetail.is, PersonDetail);
+    window.customElements.define(OrganizationDetail.is, OrganizationDetail);
   </script>
 </dom-module>

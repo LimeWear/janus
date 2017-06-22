@@ -11,9 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="person/person-detail.html">
 <link rel="import" href="shared-styles.html">
 
@@ -22,19 +19,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
-
-        padding: 10px;
+        height: 100%;
       }
     </style>
-    <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/person/:pid" data="{{data}}"></app-route>
-    <firebase-document
-        id="personData"
-        path="/-KlVD-goFLDjxxEM7qEz/People/{{data.pid}}"
-        data="{{person}}">
-    </firebase-document>
-
-    <person-detail person="{{person}}"></person-detail>
+    <!-- <app-route route="{{route}}" pattern="/person/:pid" data="{{routeData}}" tail="{{subroute}}"></app-route> -->
+    <person-detail route="{{route}}"></person-detail>
   </template>
 
   <script>
@@ -42,16 +31,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'janus-person'; }
       static get properties() {
         return {
-          pid: {
-            type: String
-          },
-          person: {
-            type: Object
-          }
+          routeData: Object,
+          subroute: String,
         };
       }
     }
-
     window.customElements.define(JanusPerson.is, JanusPerson);
   </script>
 </dom-module>

@@ -25,17 +25,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-shared-styles.html">
+<link rel="import" href="../utils/janus-drawer.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="add-organization-form">
   <template>
     <style include="shared-styles">
       :host {
+        padding: 20px;
         display: block;
+        overflow: auto;
+        position: absolute;
+        top: 0;
+        bottom: 0;
         --paper-input-container-input: {
           font-size: 14px;
         };
@@ -47,15 +49,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 0 10px;
       }
       #organizationNames .name,
-      #organizationLocations .location,
+      .location,
+      .contacts,
       #organizationReferences{
         @apply(--layout-horizontal);
         @apply(--layout-wrap);
       }
       #organizationNames .name paper-input,
       #organizationNames .name paper-dropdown-menu,
-      #organizationLocations .location paper-input,
-      #organizationLocations .location paper-dropdown-menu,
+      .location paper-input,
+      .location paper-dropdown-menu,
+      .contacts paper-input,
+      .contacts paper-dropdown-menu,
       #organizationReferences paper-input{
         padding: 0 10px;
         @apply(--layout-flex-auto);
@@ -73,84 +78,168 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-item-icon-width: 24px;
         padding: 0 10px;
       }
-      paper-dialog-scrollable{
-        min-height: 550px;
-      }
       .buttons{
         text-align: right;
       }
+      .action-buttons{
+        height: 65px;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        background: #fff;
+        border-top: 1px solid #ccc;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: row /* works with row or column */
+        flex-direction: row;
+        -webkit-align-items: center;
+        align-items: center;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
+      .green{
+        margin-right: 20px;
+      }
+      #close{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      paper-fab.green{
+        --paper-fab-background: var(--paper-green-500);
+        --paper-fab-keyboard-focus-background: var(--paper-green-700);
+        position: fixed;
+        top: 10px;
+        right: 10px;
+      }
     </style>
     <firebase-query
-        id="addOrganization"
-        path="/-KlVD-goFLDjxxEM7qEz/Organizations"
-        data="{{organizations}}">
+        id="organizationLocations"
+        path="/-KlVD-goFLDjxxEM7qEz/Organizations/{{oid}}/locations"
+        data="{{locations}}">
     </firebase-query>
-    <form is="iron-form" method="get" action="/" id="newOrganization">
-      <paper-dialog-scrollable>
+    <firebase-query
+        id="organizationContacts"
+        path="/-KlVD-goFLDjxxEM7qEz/Organizations/{{oid}}/contacts"
+        data="{{contacts}}">
+    </firebase-query>
+      <paper-fab mini icon="done" class="green" on-tap="_save"></paper-fab>
+      <!-- <paper-icon-item id="close" on-tap="_closeDrawer"><iron-icon icon="icons:close" slot="item-icon" ></iron-icon></paper-icon-item> -->
       <h3>General Information</h3>
-      <div id="organizationName">
-        <div id="orgName" class="name">
-          <paper-input id="name" value="{{orgName}}" label="Name" required autoValidate autoFocus></paper-input>
+      <div id="organizationNames">
+        <div id="name" class="name">
+          <paper-input id="first" value="{{organization.info.name}}" label="Organization Name" autofocus></paper-input>
         </div>
       </div>
       <h3>Address Information</h3>
-      <div id="organizationLocations">
-        <div id="location" class="location">
-          <paper-input value="{{name}}" label="Name" required autoValidate></paper-input>
-          <paper-input value="{{street}}" label="Street"></paper-input>
-          <paper-input value="{{street2}}" label="Street 2"></paper-input>
-          <paper-input value="{{city}}" label="City"></paper-input>
-          <paper-input value="{{state}}" label="State"></paper-input>
-          <paper-input value="{{zip}}" label="Zip"></paper-input>
-        </div>
+      <div class="organizationLocations">
+        <template is="dom-repeat" items="{{locations}}" as="location" mutableData>
+          <div class="location">
+            <paper-dropdown-menu id="type" label="Type">
+              <paper-listbox slot="dropdown-content" selected="{{location.type}}" attr-for-selected="value">
+                <paper-item value="Shipping">Shipping</paper-item>
+                <paper-item value="Billing">Billing</paper-item>
+                <paper-item value="Other">Other</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input value="{{location.name}}" label="Name"></paper-input>
+            <paper-input value="{{location.street}}" label="Street"></paper-input>
+            <paper-input value="{{location.street2}}" label="Street 2"></paper-input>
+            <paper-input value="{{location.city}}" label="City"></paper-input>
+            <paper-input value="{{location.state}}" label="State"></paper-input>
+            <paper-input value="{{location.zip}}" label="Zip"></paper-input>
+          </div>
+        </template>
+        <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon>Add Location</paper-icon-item>
+        <h3>Contact Information</h3>
+        <div class="organizationLocations">
+          <template is="dom-repeat" items="{{contacts}}" as="contact" mutableData>
+            <div class="contacts">
+              <paper-dropdown-menu id="type" label="Type">
+                <paper-listbox slot="dropdown-content" selected="{{contact.type}}" attr-for-selected="value">
+                  <paper-item value="Phone">Phone</paper-item>
+                  <paper-item value="Email">Email</paper-item>
+                  <paper-item value="Other">Other</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <paper-input value="{{contact.name}}" label="Name"></paper-input>
+              <paper-input value="{{contact.value}}" label="Value"></paper-input>
+              <paper-input value="{{contact.note}}" label="Note"></paper-input>
+            </div>
+          </template>
       </div>
-      <paper-icon-item on-tap="_addLocation"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon> Add Location</paper-icon-item>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button raised class="green" on-tap="_addOrganization">Submit</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
+      <paper-icon-item on-tap="_addContact"><iron-icon icon="icons:add" slot="item-icon" ></iron-icon>Add Contact</paper-icon-item>
+      <h3>Linked to:</h3>
+      <div id="organizationReferences">
+        <paper-input id="organizationOrganization" name="organization" label="Organization"></paper-input>
+        <paper-input id="organizationOwner" name="owner" label="Owner"></paper-input>
       </div>
-    </form>
   </template>
 
   <script>
-    class AddOrganizationForm extends Polymer.Element {
+    class AddOrganizationForm extends Polymer.MutableData(Polymer.Element)  {
+      constructor() {
+        super();
+
+      }
       static get is() { return 'add-organization-form'; }
       static get properties() {
         return {
-          orgName: {
+          oid: {
             type: String,
+          },
+          organization: {
+            type: Object,
+          },
+          locations: {
+            type: Array,
+          },
+          contacts: {
+            type: Array,
+          },
+          organization: {
+            type: Array,
+          },
+          opened: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true
           },
         };
       }
-
-      _addLocation(e){
-        var location = this.$.location;
-        var newLocation = location.cloneNode(true);
-        newLocation.id = "location-" + Math.floor(1000 + Math.random() * 9000);;
-        for(var i in location.properties) {
-            newLocation[i] = location[i]
-          }
-          var newLocationForm = Polymer.dom(this.root).querySelector('#organizationLocations');
-          newLocationForm.appendChild(newLocation);
+      static get observers() {
+        return [
+          '_oid(oid)'
+        ]
       }
-      ready(){
-        super.ready();
-        var scrollable = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
-        scrollable.dialogElement = Polymer.dom(this.root).querySelector('paper-dialog-scrollable');
+      _oid(oid){
+        console.log(this.$.organizationLocations.path, this.$.organizationLocations.data);
       }
-      _addOrganization(){
-        var orangization = {
-          info:{
-            name: this.orgName
-          }
-        }
-        var newOrganizationRef = this.$.addOrganization.ref.push(orangization).key;
-
-        this.dispatchEvent(new CustomEvent('closeDialog', {bubbles: true, composed: true, detail: {dialog: "addOrganization"}}));
+      _addLocation(){
+        var pushId = this.$.organizationLocations.ref.push().key;
+        this.push('locations', {
+          '$key': pushId,
+          'type': "Billing"
+        });
+      }
+      _addContact(){
+        var pushId = this.$.organizationLocations.ref.push().key;
+        this.push('contacts', {
+          '$key': pushId,
+          'type': "Billing"
+        });
+      }
+      _save(){
+        this.set('opened', false);
+        console.log(this.opened);
+        var timestamp = Date.now();
+        this.$.organizationLocations.path = "/-KlVD-goFLDjxxEM7qEz/Organizations/"+this.oid+"/info/timestamp/updated";
+        this.$.organizationLocations.ref.set(timestamp);
       }
     }
 
-    window.customElements.define(AddOrganizationForm.is, AddOrganizationForm);
+    window.customElements.define(AddOrganizationForm.is, AddOrganizationForm  );
   </script>
 </dom-module>

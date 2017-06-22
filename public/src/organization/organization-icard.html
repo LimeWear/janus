@@ -40,10 +40,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <a name="organization" href="/organization/[[organization.$key]]">
     <paper-card>
       <div class="card-content">
+        <div class="profile-img">
+          <image-mask shape="square" size="70" src="../images/default_profile_image.png" href="#" title="A short description of an image" desc="A long description of an image"></image-mask>
+        </div>
         <div class="organization-info">
-          <div class="name">{{organization.info.name}}</div>
-          <div class="email">{{person.info.email.address}}</div>
-          <div class="phone">480-221-6959</div>
+          <div class="organization">{{organization.info.name}}</div>
+          <div class="email">{{organization.info.email.address}}</div>
+          <div class="phone">{{organization.info.phone.number}}</div>
         </div>
       </div>
     </paper-card>

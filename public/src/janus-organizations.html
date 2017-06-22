@@ -15,76 +15,61 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
+<link rel="import" href="utils/janus-drawer.html">
+<link rel="import" href="organization/add-organization-form.html">
 <link rel="import" href="organization/organization-icard.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="janus-organizations">
   <template>
-    <style include="shared-styles">
+    <style include="shared-styles iron-flex iron-flex-alignment">
       :host {
-        display: block;
-
-        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
       }
       .container {
         @apply --layout-horizontal;
         @apply --layout-justified;
       }
       .icard {
-        padding: 10px;
+        flex-grow: 2;
+        margin: 10px;
       }
-      .person-header { @apply --paper-font-headline; }
+      .organization-header { @apply --paper-font-headline; }
       .cafe-light { color: var(--paper-grey-600); }
-      .person-opportunities {
+      .organization-opportunities {
         float: right;
         font-size: 15px;
         vertical-align: middle;
       }
-      .add-activity,.add-opportunity { color: var(--google-blue-500); }
-      iron-icon.star {
-        --iron-icon-width: 16px;
-        --iron-icon-height: 16px;
-        color: var(--paper-amber-500);
-      }
-      iron-icon.star:last-of-type { color: var(--paper-grey-500); }
-      .add-actions{
-        padding: 10px;
-        text-align: right;
-      }      
+
     </style>
     <firebase-query
         id="query"
         path="/-KlVD-goFLDjxxEM7qEz/Organizations"
         data="{{organizations}}">
     </firebase-query>
-    <div class="add-actions">
-      <paper-button id="addPerson" class="green" raised on-tap="_addOrganizationForm">Add Organization</paper-button>
-    </div>
-    <div class="container layout horizontal wrap">
       <template is="dom-repeat" items="{{organizations}}" as="organization">
-        <organization-icard organization="{{organization}}" class="icard flex-auto"></organization-icard>
+        <organization-icard organization="{{organization}}" class="icard "></organization-icard>
       </template>
-    </div>
-
-
   </template>
 
   <script>
+
     class JanusOrganizations extends Polymer.Element {
       static get is() { return 'janus-organizations'; }
       static get properties() {
         return {
-          modalOpened: {
-            type: Boolean,
-            value: false
+          organizations: {
+            type: Object
           }
         };
-      }
-      _addOrganizationForm(e) {
-        this.dispatchEvent(new CustomEvent('addNewOrganization', {bubbles: true, composed: true}));
       }
     }
 
